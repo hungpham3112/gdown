@@ -35,17 +35,18 @@ def parse_url(url, warning=True):
             r"^/spreadsheets/u/[0-9]+/d/(.*?)/(edit|htmlview|view)$",
         ]
         for pattern in patterns:
-            match = re.match(pattern, parsed.path)
-            if match:
+            if match := re.match(pattern, parsed.path):
                 file_id = match.groups()[0]
                 break
 
     if warning and not is_download_link:
         warnings.warn(
-            "You specified a Google Drive link that is not the correct link "
-            "to download a file. You might want to try `--fuzzy` option "
-            "or the following url: {url}".format(
-                url="https://drive.google.com/uc?id={}".format(file_id)
+            (
+                "You specified a Google Drive link that is not the correct link "
+                "to download a file. You might want to try `--fuzzy` option "
+                "or the following url: {url}".format(
+                    url=f"https://drive.google.com/uc?id={file_id}"
+                )
             )
         )
 

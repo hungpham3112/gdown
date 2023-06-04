@@ -25,24 +25,20 @@ home = osp.expanduser("~")
 def get_url_from_gdrive_confirmation(contents):
     url = ""
     for line in contents.splitlines():
-        m = re.search(r'href="(\/uc\?export=download[^"]+)', line)
-        if m:
-            url = "https://docs.google.com" + m.groups()[0]
+        if m := re.search(r'href="(\/uc\?export=download[^"]+)', line):
+            url = f"https://docs.google.com{m.groups()[0]}"
             url = url.replace("&amp;", "&")
             break
-        m = re.search('id="download-form" action="(.+?)"', line)
-        if m:
+        if m := re.search('id="download-form" action="(.+?)"', line):
             url = m.groups()[0]
             url = url.replace("&amp;", "&")
             break
-        m = re.search('"downloadUrl":"([^"]+)', line)
-        if m:
+        if m := re.search('"downloadUrl":"([^"]+)', line):
             url = m.groups()[0]
             url = url.replace("\\u003d", "=")
             url = url.replace("\\u0026", "&")
             break
-        m = re.search('<p class="uc-error-subcaption">(.*)</p>', line)
-        if m:
+        if m := re.search('<p class="uc-error-subcaption">(.*)</p>', line):
             error = m.groups()[0]
             raise FileURLRetrievalError(error)
     if not url:
@@ -73,10 +69,7 @@ def _get_session(proxy, use_cookies, return_cookies_file=False):
         for k, v in cookies:
             sess.cookies[k] = v
 
-    if return_cookies_file:
-        return sess, cookies_file
-    else:
-        return sess
+    return (sess, cookies_file) if return_cookies_file else sess
 
 
 def download(
@@ -290,7 +283,7 @@ def download(
         f = output
 
     if tmp_file is not None and f.tell() != 0:
-        headers = {"Range": "bytes={}-".format(f.tell())}
+        headers = {"Range": f"bytes={f.tell()}-"}
         res = sess.get(url, headers=headers, stream=True, verify=verify)
 
     if not quiet:

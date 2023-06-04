@@ -11,9 +11,8 @@ def get_version():
             r"""^__version__ = ['"]([^'"]*)['"]""", f.read(), re.M
         )
     if not match:
-        raise RuntimeError("{} doesn't contain __version__".format(filename))
-    version = match.groups()[0]
-    return version
+        raise RuntimeError(f"{filename} doesn't contain __version__")
+    return match.groups()[0]
 
 
 version = get_version()
