@@ -9,26 +9,18 @@ def test_parse_url():
     # list of (url, expected, check_warn)
     urls = [
         (
-            "https://drive.google.com/open?id={}".format(file_id),
+            f"https://drive.google.com/open?id={file_id}",
+            (file_id, False),
+            True,
+        ),
+        (f"https://drive.google.com/uc?id={file_id}", (file_id, True), False),
+        (
+            f"https://drive.google.com/file/d/{file_id}/view?usp=sharing",
             (file_id, False),
             True,
         ),
         (
-            "https://drive.google.com/uc?id={}".format(file_id),
-            (file_id, True),
-            False,
-        ),
-        (
-            "https://drive.google.com/file/d/{}/view?usp=sharing".format(
-                file_id
-            ),  # NOQA
-            (file_id, False),
-            True,
-        ),
-        (
-            "https://drive.google.com/a/jsk.imi.i.u-tokyo.ac.jp/uc?id={}&export=download".format(  # NOQA
-                file_id
-            ),
+            f"https://drive.google.com/a/jsk.imi.i.u-tokyo.ac.jp/uc?id={file_id}&export=download",
             (file_id, True),
             False,
         ),

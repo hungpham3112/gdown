@@ -79,9 +79,7 @@ def _parse_google_drive_file(url, content):
         name = sep.join(splitted[:-1])
     else:
         raise RuntimeError(
-            "file/folder name cannot be extracted from: {}".format(
-                folder_soup.title.contents[0]
-            )
+            f"file/folder name cannot be extracted from: {folder_soup.title.contents[0]}"
         )
 
     gdrive_file = _GoogleDriveFile(
@@ -110,11 +108,7 @@ def _download_and_parse_google_drive_link(
     return_code = True
 
     # canonicalize the language into English
-    if "?" in url:
-        url += "&hl=en"
-    else:
-        url += "?hl=en"
-
+    url += "&hl=en" if "?" in url else "?hl=en"
     res = sess.get(url, verify=verify)
 
     if res.status_code != 200:
@@ -152,7 +146,7 @@ def _download_and_parse_google_drive_link(
             )
         return_code, child = _download_and_parse_google_drive_link(
             sess=sess,
-            url="https://drive.google.com/drive/folders/" + child_id,
+            url=f"https://drive.google.com/drive/folders/{child_id}",
             quiet=quiet,
             remaining_ok=remaining_ok,
         )
@@ -182,10 +176,13 @@ def _get_directory_structure(gdrive_file, previous_path):
             directory_structure.append(
                 (None, osp.join(previous_path, file.name))
             )
-            for i in _get_directory_structure(
-                file, osp.join(previous_path, file.name)
-            ):
-                directory_structure.append(i)
+            directory_structure.extend(
+                iter(
+                    _get_directory_structure(
+                        file, osp.join(previous_path, file.name)
+                    )
+                )
+            )
         elif not file.children:
             directory_structure.append(
                 (file.id, osp.join(previous_path, file.name))
@@ -283,7 +280,7 @@ def download_folder(
             continue
 
         filename = download(
-            url="https://drive.google.com/uc?id=" + file_id,
+            url=f"https://drive.google.com/uc?id={file_id}",
             output=file_path,
             quiet=quiet,
             proxy=proxy,

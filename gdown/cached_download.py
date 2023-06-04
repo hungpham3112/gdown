@@ -32,19 +32,19 @@ def md5sum(filename, blocksize=None):
 
 def assert_md5sum(filename, md5, quiet=False, blocksize=None):
     if not (isinstance(md5, str) and len(md5) == 32):
-        raise ValueError("MD5 must be 32 chars: {}".format(md5))
+        raise ValueError(f"MD5 must be 32 chars: {md5}")
 
     if not quiet:
-        print("Computing MD5: {}".format(filename))
+        print(f"Computing MD5: {filename}")
     md5_actual = md5sum(filename)
 
     if md5_actual == md5:
         if not quiet:
-            print("MD5 matches: {}".format(filename))
+            print(f"MD5 matches: {filename}")
         return True
 
     raise AssertionError(
-        "MD5 doesn't match:\nactual: {}\nexpected: {}".format(md5_actual, md5)
+        f"MD5 doesn't match:\nactual: {md5_actual}\nexpected: {md5}"
     )
 
 
@@ -83,17 +83,18 @@ def cached_download(
         path = osp.join(cache_root, path)
 
     # check existence
-    if osp.exists(path) and not md5:
-        if not quiet:
-            print("File exists: {}".format(path))
-        return path
-    elif osp.exists(path) and md5:
-        try:
-            assert_md5sum(path, md5, quiet=quiet)
+    if osp.exists(path):
+        if not md5:
+            if not quiet:
+                print(f"File exists: {path}")
             return path
-        except AssertionError as e:
-            # show warning and overwrite if md5 doesn't match
-            print(e, file=sys.stderr)
+        else:
+            try:
+                assert_md5sum(path, md5, quiet=quiet)
+                return path
+            except AssertionError as e:
+                # show warning and overwrite if md5 doesn't match
+                print(e, file=sys.stderr)
 
     # download
     lock_path = osp.join(cache_root, "_dl_lock")
@@ -107,10 +108,7 @@ def cached_download(
 
         if not quiet:
             msg = "Cached Downloading"
-            if path:
-                msg = "{}: {}".format(msg, path)
-            else:
-                msg = "{}...".format(msg)
+            msg = f"{msg}: {path}" if path else f"{msg}..."
             print(msg, file=sys.stderr)
 
         download(url, temp_path, quiet=quiet, **kwargs)
